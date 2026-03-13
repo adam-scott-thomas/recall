@@ -18,6 +18,9 @@ chrome.runtime.sendMessage({ type: 'stats' }, (stats) => {
   }
 });
 
+// On load, show recent conversations
+loadConversations();
+
 // Mode toggle
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -43,7 +46,7 @@ openOptionsLink.addEventListener('click', (e) => {
 function doSearch() {
   const query = searchInput.value.trim();
   if (!query) {
-    resultsContainer.innerHTML = '<div class="no-results">Type to search your conversations</div>';
+    loadConversations();
     return;
   }
 
@@ -54,6 +57,30 @@ function doSearch() {
     }
     renderResults(results, query);
   });
+}
+
+function loadConversations() {
+  chrome.runtime.sendMessage({ type: 'getConversations' }, (convs) => {
+    if (!convs || convs.length === 0) {
+      resultsContainer.innerHTML = '<div class="no-results">No conversations yet. Import from settings.</div>';
+      return;
+    }
+    // Sort by most recent
+    convs.sort((a, b) => (b.updateTime || b.createTime || 0) - (a.updateTime || a.createTime || 0));
+    renderConversationList(convs.slice(0, 50));
+  });
+}
+
+function renderConversationList(convs) {
+  resultsContainer.innerHTML = convs.map(conv => `
+    <div class="result-card conv-card" data-conv-id="${escapeHtml(conv.conversationId)}">
+      <div class="result-meta">
+        ${conv.domain ? `<span class="domain-badge">${escapeHtml(conv.domain)}</span>` : ''}
+        <span class="conv-title">${escapeHtml(conv.title || 'Untitled')}</span>
+      </div>
+      <div class="result-time">${conv.messageCount || '?'} messages${conv.createTime ? ' · ' + formatTime(conv.createTime) : ''}</div>
+    </div>
+  `).join('');
 }
 
 function renderResults(results, query) {
@@ -74,6 +101,65 @@ function renderResults(results, query) {
       </div>
     `;
   }).join('');
+}
+
+// Click delegation on results container
+resultsContainer.addEventListener('click', (e) => {
+  const card = e.target.closest('.result-card');
+  if (!card) return;
+  const convId = card.dataset.convId;
+  const msgId = card.dataset.msgId;
+  if (convId) showConversation(convId, msgId);
+});
+
+// Back button handler
+document.getElementById('back-btn').addEventListener('click', () => {
+  document.getElementById('conversation-view').style.display = 'none';
+  document.querySelector('header').style.display = 'block';
+  resultsContainer.style.display = 'block';
+  document.querySelector('footer').style.display = 'flex';
+});
+
+function showConversation(convId, highlightMsgId) {
+  // Hide search, show conversation
+  document.querySelector('header').style.display = 'none';
+  resultsContainer.style.display = 'none';
+  document.querySelector('footer').style.display = 'none';
+  document.getElementById('conversation-view').style.display = 'flex';
+
+  chrome.runtime.sendMessage({ type: 'getMessages', conversationId: convId }, (messages) => {
+    chrome.runtime.sendMessage({ type: 'getConversations' }, (convs) => {
+      const conv = convs?.find(c => c.conversationId === convId);
+      document.getElementById('conv-title-display').textContent = conv?.title || convId;
+
+      const container = document.getElementById('conv-messages');
+      if (!messages || messages.length === 0) {
+        container.innerHTML = '<div class="no-results">No messages found</div>';
+        return;
+      }
+
+      // Sort by timestamp
+      messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+      container.innerHTML = messages.map(msg => {
+        const role = msg.role || 'unknown';
+        const isHighlighted = msg.messageId === highlightMsgId;
+        return `
+          <div class="message-bubble ${role} ${isHighlighted ? 'highlighted' : ''}"
+               id="msg-${msg.messageId}">
+            <div class="message-role">${role}</div>
+            <div>${escapeHtml(msg.text || '')}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Scroll to highlighted message
+      if (highlightMsgId) {
+        const el = document.getElementById('msg-' + highlightMsgId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
 }
 
 function highlightMatch(text, query) {
