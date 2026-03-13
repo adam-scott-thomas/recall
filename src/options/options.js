@@ -47,27 +47,62 @@ dropZone.addEventListener('drop', (e) => {
 
 async function handleFiles(files) {
   for (const file of files) {
-    showStatus(`Importing ${file.name}...`, '');
-    const text = await file.text();
-    chrome.runtime.sendMessage({ type: 'import', data: text, filename: file.name }, (result) => {
-      if (result && result.error) {
-        showStatus(result.error, 'error');
-      } else if (result) {
-        showStatus(
-          `Imported ${result.imported} conversations (${result.messages} messages). ` +
-          `${result.skippedConvs} duplicate conversations skipped. Format: ${result.format}`,
-          'success'
-        );
-        loadStats();
-      }
-    });
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+
+    if (file.size > 500 * 1024 * 1024) {
+      showStatus(`File too large (${sizeMB} MB). Maximum supported size is 500 MB.`, 'error');
+      continue;
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      showStatus(`Large file (${sizeMB} MB). This may take a moment...`, '');
+    } else {
+      showStatus(`Reading ${file.name} (${sizeMB} MB)...`, '');
+    }
+
+    try {
+      const text = await readFileWithProgress(file);
+      showStatus(`Importing ${file.name}...`, '');
+
+      chrome.runtime.sendMessage({ type: 'import', data: text, filename: file.name }, (result) => {
+        if (result && result.error) {
+          showStatus(result.error, 'error');
+        } else if (result) {
+          showStatus(
+            `Imported ${result.imported} conversations (${result.messages} messages). ` +
+            `${result.skippedConvs} duplicate conversations skipped. Format: ${result.format}`,
+            'success'
+          );
+          loadStats();
+        }
+      });
+    } catch (err) {
+      showStatus(`Error reading file: ${err.message}`, 'error');
+    }
   }
+}
+
+function readFileWithProgress(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        showStatus(`Reading ${file.name}... ${pct}%`, '');
+      }
+    };
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
 }
 
 function showStatus(msg, type) {
   importStatus.textContent = msg;
   importStatus.className = type || '';
-  if (type) importStatus.style.display = 'block';
+  importStatus.style.display = 'block';
 }
 
 // Export
