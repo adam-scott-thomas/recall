@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recall</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Recall</h1>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search your conversations..." autofocus>
+      </div>
+      <div class="modes">
+        <button class="mode-btn active" data-mode="text">Text</button>
+        <button class="mode-btn" data-mode="first">First Mention</button>
+        <button class="mode-btn" data-mode="timeline">Timeline</button>
+        <button class="mode-btn" data-mode="fuzzy">Fuzzy</button>
+      </div>
+    </header>
+
+    <div id="results" class="results"></div>
+
+    <footer>
+      <span id="stats">Loading...</span>
+      <a href="#" id="open-options">Import / Settings</a>
+    </footer>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
