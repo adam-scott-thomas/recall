@@ -44,6 +44,18 @@ describe('RecallStore', () => {
     expect(stats.messageCount).toBe(1);
   });
 
+  it('getAllMessages returns all stored messages', async () => {
+    await store.putMessages([
+      { messageId: 'm1', conversationId: 'c1', role: 'user', text: 'alpha', contentHash: 'h1' },
+      { messageId: 'm2', conversationId: 'c2', role: 'assistant', text: 'beta', contentHash: 'h2' },
+      { messageId: 'm3', conversationId: 'c1', role: 'user', text: 'gamma', contentHash: 'h3' },
+    ]);
+    const all = await store.getAllMessages();
+    expect(all).toHaveLength(3);
+    const ids = all.map(m => m.messageId).sort();
+    expect(ids).toEqual(['m1', 'm2', 'm3']);
+  });
+
   it('exports and clears all data', async () => {
     await store.putConversation({ conversationId: 'c1', title: 'T', messageCount: 0 });
     const exported = await store.exportAll();

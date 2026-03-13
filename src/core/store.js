@@ -99,6 +99,11 @@ export class RecallStore {
     return this._request(index, 'getAll', convId);
   }
 
+  async getAllMessages() {
+    const { store } = this._tx('messages');
+    return this._request(store, 'getAll');
+  }
+
   async searchText(query, limit = 50) {
     const queryLower = query.toLowerCase();
     const { store } = this._tx('messages');

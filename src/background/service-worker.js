@@ -4,13 +4,28 @@ import { parseExport } from '../core/parser.js';
 import { createClassifier, classify } from '../core/classifier.js';
 import { deduplicateMessages, deduplicateConversations } from '../core/dedup.js';
 import { RecallStore } from '../core/store.js';
+import { searchText, searchFuzzy, searchFirst, searchTimeline } from '../core/search.js';
 
 const store = new RecallStore();
 const classifier = createClassifier();
 let storeReady = false;
+let cachedMessages = null;
 
 async function ensureStore() {
   if (!storeReady) { await store.open(); storeReady = true; }
+}
+
+async function getEnrichedMessages() {
+  if (cachedMessages) return cachedMessages;
+  await ensureStore();
+  const messages = await store.getAllMessages();
+  const conversations = await store.getAllConversations();
+  const convMap = new Map(conversations.map(c => [c.conversationId, c]));
+  cachedMessages = messages.map(msg => ({
+    ...msg,
+    convTitle: convMap.get(msg.conversationId)?.title || '',
+  }));
+  return cachedMessages;
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -52,6 +67,7 @@ async function handleImport(rawText, filename) {
     // Store
     await store.putConversations(dedupedConvs);
     await store.putMessages(dedupedMsgs);
+    cachedMessages = null; // invalidate enriched cache
 
     return {
       imported: dedupedConvs.length,
@@ -66,11 +82,20 @@ async function handleImport(rawText, filename) {
 }
 
 async function handleSearch(query, mode = 'text') {
-  await ensureStore();
-  if (mode === 'text') return store.searchText(query);
-  // For other modes, load all messages and use search module
-  // (v1 simplification: all modes go through store.searchText)
-  return store.searchText(query);
+  const messages = await getEnrichedMessages();
+  switch (mode) {
+    case 'fuzzy':
+      return searchFuzzy(messages, query);
+    case 'first': {
+      const result = searchFirst(messages, query);
+      return result ? [result] : [];
+    }
+    case 'timeline':
+      return searchTimeline(messages, query);
+    case 'text':
+    default:
+      return searchText(messages, query);
+  }
 }
 
 async function handleStats() {
@@ -86,6 +111,7 @@ async function handleExport() {
 async function handleDeleteAll() {
   await ensureStore();
   await store.deleteAll();
+  cachedMessages = null; // invalidate enriched cache
   return { success: true };
 }
 
