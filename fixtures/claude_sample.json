@@ -1,0 +1,22 @@
+[
+  {
+    "uuid": "conv-uuid-001",
+    "name": "Test Claude Conversation",
+    "created_at": "2024-03-10T00:00:00.000Z",
+    "updated_at": "2024-03-10T01:00:00.000Z",
+    "chat_messages": [
+      {
+        "uuid": "msg-uuid-001",
+        "sender": "human",
+        "text": "What is the meaning of life?",
+        "created_at": "2024-03-10T00:00:00.000Z"
+      },
+      {
+        "uuid": "msg-uuid-002",
+        "sender": "assistant",
+        "text": "That's a profound question with many philosophical perspectives.",
+        "created_at": "2024-03-10T00:01:00.000Z"
+      }
+    ]
+  }
+]

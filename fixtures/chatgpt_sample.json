@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Test Conversation",
+    "create_time": 1710000000,
+    "update_time": 1710003600,
+    "conversation_id": "conv-001",
+    "mapping": {
+      "root": {
+        "id": "root",
+        "message": null,
+        "parent": null,
+        "children": ["msg-1"]
+      },
+      "msg-1": {
+        "id": "msg-1",
+        "message": {
+          "id": "msg-1",
+          "author": {"role": "user"},
+          "content": {"content_type": "text", "parts": ["Hello, how are you?"]},
+          "create_time": 1710000000,
+          "metadata": {}
+        },
+        "parent": "root",
+        "children": ["msg-2"]
+      },
+      "msg-2": {
+        "id": "msg-2",
+        "message": {
+          "id": "msg-2",
+          "author": {"role": "assistant"},
+          "content": {"content_type": "text", "parts": ["I'm doing well! How can I help you today?"]},
+          "create_time": 1710000060,
+          "metadata": {"model_slug": "gpt-4"}
+        },
+        "parent": "msg-1",
+        "children": []
+      }
+    }
+  }
+]
