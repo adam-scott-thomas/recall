@@ -62,7 +62,7 @@ async function handleFiles(files) {
 
     try {
       const text = await readFileWithProgress(file);
-      showStatus(`Importing ${file.name}...`, '');
+      showStatus(`Importing ${file.name}...`, 'loading');
 
       chrome.runtime.sendMessage({ type: 'import', data: text, filename: file.name }, (result) => {
         if (result && result.error) {
@@ -100,9 +100,14 @@ function readFileWithProgress(file) {
 }
 
 function showStatus(msg, type) {
-  importStatus.textContent = msg;
-  importStatus.className = type || '';
+  const spinner = type === 'loading' ? '<span class="spinner"></span>' : '';
+  importStatus.innerHTML = spinner + escapeHtml(msg);
+  importStatus.className = type === 'loading' ? '' : (type || '');
   importStatus.style.display = 'block';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Export
