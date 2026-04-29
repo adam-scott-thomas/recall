@@ -102,7 +102,7 @@ Provide these in the "Notes for the reviewer" field on the Web Store dashboard:
 
 **Homepage URL:** `https://ghostlogic.tech/recall`
 
-**Support email / URL:** `mailto:support@ghostlogic.tech` (the Web Store dashboard accepts a `mailto:` URI in the Support URL field)
+**Support URL:** `https://ghostlogic.tech/recall/issues`
 
 ---
 
