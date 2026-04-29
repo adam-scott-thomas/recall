@@ -1,28 +1,36 @@
 :root {
+  /* Light mode — white surface with deep electric blue accents */
   --bg: #ffffff;
-  --bg-secondary: #f4f4f8;
-  --text: #1a1a1a;
-  --text-secondary: #5a5a6e;
-  --border: #d8d8e4;
-  --accent: #1a1a80;
-  --accent-light: #e8e8f4;
-  --user-badge: #059669;
-  --assistant-badge: #6a5acd;
-  --highlight: #fef08a;
+  --bg-secondary: #f1f5fb;
+  --text: #020205;
+  --text-secondary: #4a5680;
+  --border: #d0dbf0;
+  --accent: #1B4DD1;
+  --accent-light: rgba(27, 77, 209, 0.08);
+  --accent-glow: rgba(61, 165, 255, 0.25);
+  --user-badge: #1B4DD1;
+  --assistant-badge: #3DA5FF;
+  --highlight: rgba(61, 165, 255, 0.28);
+  --highlight-text: #020205;
+  --seam: linear-gradient(90deg, transparent 0%, rgba(61, 165, 255, 0.5) 50%, transparent 100%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12122a;
-    --bg-secondary: #1a1a3e;
-    --text: #e0e0e8;
-    --text-secondary: #9898b0;
-    --border: #2a2a50;
-    --accent: #8888cc;
-    --accent-light: #252550;
-    --user-badge: #34d399;
-    --assistant-badge: #a78bfa;
-    --highlight: #854d0e;
+    /* Dark mode — matches the lightning-R icon */
+    --bg: #020205;
+    --bg-secondary: #0A0E1F;
+    --text: #E8F4FF;
+    --text-secondary: #6B7DA8;
+    --border: #1B2547;
+    --accent: #3DA5FF;
+    --accent-light: rgba(61, 165, 255, 0.12);
+    --accent-glow: rgba(91, 200, 255, 0.45);
+    --user-badge: #5BC8FF;
+    --assistant-badge: #1B4DD1;
+    --highlight: rgba(91, 200, 255, 0.25);
+    --highlight-text: #E8F4FF;
+    --seam: linear-gradient(90deg, transparent 0%, rgba(91, 200, 255, 0.6) 50%, transparent 100%);
   }
 }
 
@@ -51,12 +59,26 @@ body {
 header {
   padding: 12px;
   border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+/* Subtle electric "seam" under the header — nods to the icon's lightning */
+header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--seam);
+  pointer-events: none;
 }
 
 header h1 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
+  letter-spacing: 0.02em;
 }
 
 .search-box input {
@@ -68,11 +90,12 @@ header h1 {
   color: var(--text);
   font-size: 13px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .search-box input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-light);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .modes {
@@ -89,12 +112,19 @@ header h1 {
   color: var(--text-secondary);
   font-size: 11px;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.mode-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .mode-btn.active {
   background: var(--accent);
-  color: white;
+  color: #ffffff;
   border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .results {
@@ -108,6 +138,7 @@ header h1 {
   padding: 8px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+  transition: background 0.1s ease;
 }
 
 .result-card:hover {
@@ -128,16 +159,17 @@ header h1 {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .role-badge.user {
   background: var(--user-badge);
-  color: white;
+  color: #020205;
 }
 
 .role-badge.assistant {
   background: var(--assistant-badge);
-  color: white;
+  color: #ffffff;
 }
 
 .conv-title {
@@ -157,8 +189,8 @@ header h1 {
 
 .result-text mark {
   background: var(--highlight);
-  color: inherit;
-  padding: 0 1px;
+  color: var(--highlight-text);
+  padding: 0 2px;
   border-radius: 2px;
 }
 
@@ -189,6 +221,11 @@ footer a {
   text-decoration: none;
 }
 
+footer a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-glow);
+}
+
 .conversation-view {
   flex: 1;
   display: flex;
@@ -212,6 +249,12 @@ footer a {
   cursor: pointer;
   padding: 4px 8px;
   font-size: 12px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.back-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .conv-title-display {
@@ -252,12 +295,14 @@ footer a {
 .message-bubble.highlighted {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  box-shadow: 0 0 16px var(--accent-glow);
 }
 
 .message-role {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 4px;
   color: var(--text-secondary);
 }
@@ -271,3 +316,33 @@ footer a {
   border: 1px solid var(--border);
   color: var(--text-secondary);
 }
+
+body.tab-view {
+  width: 100%;
+  min-height: 100vh;
+  max-height: none;
+  font-size: 14px;
+}
+
+body.tab-view .container {
+  max-width: 960px;
+  margin: 0 auto;
+  height: 100vh;
+  padding: 0 16px;
+}
+
+body.tab-view header {
+  padding: 20px 0;
+}
+
+body.tab-view header h1 { font-size: 22px; margin-bottom: 12px; }
+body.tab-view .search-box input { font-size: 15px; padding: 10px 14px; }
+body.tab-view .mode-btn { font-size: 13px; padding: 6px 12px; }
+
+body.tab-view .results {
+  max-height: none;
+  padding: 12px 0;
+}
+
+body.tab-view .result-text { font-size: 14px; }
+body.tab-view .conv-title { font-size: 13px; }

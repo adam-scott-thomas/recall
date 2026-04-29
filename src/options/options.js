@@ -11,6 +11,11 @@ const deleteBtn = document.getElementById('delete-btn');
 const confirmDialog = document.getElementById('confirm-delete');
 const confirmYes = document.getElementById('confirm-yes');
 const confirmNo = document.getElementById('confirm-no');
+const openSearchBtn = document.getElementById('open-search-btn');
+
+openSearchBtn.addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('src/popup/popup.html') + '?view=tab' });
+});
 
 // Load stats
 function loadStats() {

@@ -1,0 +1,17 @@
+/.gitattributes    export-ignore
+/.gitignore        export-ignore
+/.github/          export-ignore
+/.claude/          export-ignore
+/tests/            export-ignore
+/fixtures/         export-ignore
+/audits/           export-ignore
+/docs/             export-ignore
+/scripts/          export-ignore
+/store/            export-ignore
+/AUDIT.md          export-ignore
+/README.md         export-ignore
+/vitest.config.js  export-ignore
+/package.json      export-ignore
+/package-lock.json export-ignore
+# Apache-2.0 §4(b) requires the LICENSE be included with redistributions —
+# the Chrome Web Store package is a redistribution, so LICENSE stays in.

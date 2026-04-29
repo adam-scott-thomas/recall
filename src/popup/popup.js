@@ -1,5 +1,9 @@
 // src/popup/popup.js
 
+if (new URLSearchParams(location.search).get('view') === 'tab') {
+  document.body.classList.add('tab-view');
+}
+
 const searchInput = document.getElementById('search-input');
 const resultsContainer = document.getElementById('results');
 const statsEl = document.getElementById('stats');

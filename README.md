@@ -21,7 +21,7 @@ Features:
 - All data stays in your browser's IndexedDB
 - No cloud, no analytics, no telemetry, no cookies
 - One permission required: `storage`
-- MIT licensed — read every line of the source
+- Apache-2.0 licensed — read every line of the source
 - No runtime dependencies — only devDependencies for testing
 
 See [docs/SECURITY.md](docs/SECURITY.md) for full details on data handling and how to verify these claims independently.
@@ -32,7 +32,7 @@ Recall is a Chrome extension installed in developer mode. It is not published to
 
 1. Clone this repository:
    ```
-   git clone https://github.com/ghostlogic/recall.git
+   git clone https://github.com/adam-scott-thomas/recall.git
    ```
 
 2. Open Chrome and go to `chrome://extensions`
@@ -89,6 +89,6 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a description of the data f
 
 ## License
 
-MIT License. Copyright GhostLogic LLC.
+Apache License 2.0.
 
 See [LICENSE](LICENSE) for the full license text.
