@@ -1,7 +1,7 @@
 // src/core/parser.js
 // Port of streaming_parser.py — parses ChatGPT and Claude conversation exports.
 
-import { normalizeText, normalizeTitle, normalizeRole, computeContentHash } from './normalizer.js';
+import { normalizeRole, computeContentHash } from './normalizer.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -68,17 +68,13 @@ function _extractTextFromParts(parts) {
 }
 
 /**
- * Generate a simple UUID-like string when none is provided.
- * Not cryptographically strong — just unique enough for local use.
+ * Generate a UUID for messages/conversations missing an ID in the export.
  *
  * @returns {string}
  */
 function _generateId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  // crypto.randomUUID() is available in all MV3 contexts (popup, options, SW).
+  return globalThis.crypto.randomUUID();
 }
 
 // ---------------------------------------------------------------------------
@@ -249,30 +245,44 @@ async function flattenClaude(rawConv) {
 
 /**
  * Parse a raw export string into normalized conversations and messages.
+ * Supports every format the sniffer recognizes: chatgpt_array, chatgpt_single,
+ * claude_array, claude_single, claude_jsonl.
  *
- * @param {string} rawText  The raw JSON string from the export file
- * @param {'chatgpt_array'|'claude_array'} format
+ * @param {string} rawText  The raw export file body
+ * @param {'chatgpt_array'|'chatgpt_single'|'claude_array'|'claude_single'|'claude_jsonl'} format
  * @returns {Promise<{conversations: object[], messages: object[]}>}
  */
 export async function parseExport(rawText, format) {
-  const parsed = JSON.parse(rawText);
+  let rawConversations;
+  let flavor; // 'chatgpt' | 'claude'
 
-  // Both supported formats are JSON arrays of conversation objects
-  const rawConversations = Array.isArray(parsed) ? parsed : [parsed];
+  if (format === 'claude_jsonl') {
+    // One JSON object per line.
+    rawConversations = rawText
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => JSON.parse(line));
+    flavor = 'claude';
+  } else if (format === 'chatgpt_array' || format === 'chatgpt_single') {
+    const parsed = JSON.parse(rawText);
+    rawConversations = Array.isArray(parsed) ? parsed : [parsed];
+    flavor = 'chatgpt';
+  } else if (format === 'claude_array' || format === 'claude_single') {
+    const parsed = JSON.parse(rawText);
+    rawConversations = Array.isArray(parsed) ? parsed : [parsed];
+    flavor = 'claude';
+  } else {
+    throw new Error(`Unsupported format: ${format}`);
+  }
 
   const allConversations = [];
   const allMessages = [];
 
   for (const rawConv of rawConversations) {
-    let result;
-
-    if (format === 'chatgpt_array') {
-      result = await flattenChatGPT(rawConv);
-    } else if (format === 'claude_array') {
-      result = await flattenClaude(rawConv);
-    } else {
-      throw new Error(`Unsupported format: ${format}`);
-    }
+    const result = flavor === 'chatgpt'
+      ? await flattenChatGPT(rawConv)
+      : await flattenClaude(rawConv);
 
     allConversations.push(result.conversation);
     allMessages.push(...result.messages);

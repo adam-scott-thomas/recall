@@ -46,26 +46,16 @@ export function normalizeRole(role) {
   return ROLE_MAP[key] || 'unknown';
 }
 
-let _sha256;
-
-async function initSha256() {
-  if (_sha256) return _sha256;
-  if (typeof globalThis.crypto?.subtle !== 'undefined') {
-    _sha256 = async (input) => {
-      const encoded = new TextEncoder().encode(input);
-      const buffer = await globalThis.crypto.subtle.digest('SHA-256', encoded);
-      return Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-    };
-  } else {
-    const { createHash } = await import('node:crypto');
-    _sha256 = async (input) => createHash('sha256').update(input).digest('hex');
-  }
-  return _sha256;
+// Web Crypto is available in all MV3 contexts (popup, options page, service
+// worker). No fallback needed; if it's missing the platform is broken.
+async function _sha256Hex(input) {
+  const encoded = new TextEncoder().encode(input);
+  const buffer = await globalThis.crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function computeContentHash(role, text) {
-  const hash = await initSha256();
   const input = `${NORMALIZER_VERSION}|${normalizeRole(role)}|${normalizeText(text)}`;
-  return hash(input);
+  return _sha256Hex(input);
 }

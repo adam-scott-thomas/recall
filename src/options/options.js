@@ -50,16 +50,21 @@ dropZone.addEventListener('drop', (e) => {
   if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
 });
 
+// chrome.runtime.sendMessage caps payloads at 64 MiB. We read the full file
+// into a string and ship it to the service worker, so cap below that with
+// headroom for JSON serialization overhead.
+const MAX_IMPORT_BYTES = 25 * 1024 * 1024; // 25 MB
+
 async function handleFiles(files) {
   for (const file of files) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
 
-    if (file.size > 500 * 1024 * 1024) {
-      showStatus(`File too large (${sizeMB} MB). Maximum supported size is 500 MB.`, 'error');
+    if (file.size > MAX_IMPORT_BYTES) {
+      showStatus(`File too large (${sizeMB} MB). Maximum supported size is 25 MB. For larger exports, split the file or open an issue.`, 'error');
       continue;
     }
 
-    if (file.size > 100 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       showStatus(`Large file (${sizeMB} MB). This may take a moment...`, '');
     } else {
       showStatus(`Reading ${file.name} (${sizeMB} MB)...`, '');
@@ -112,7 +117,12 @@ function showStatus(msg, type) {
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // Export

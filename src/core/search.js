@@ -18,10 +18,11 @@ export function searchText(messages, query, limit = 50) {
       const score = (count * q.length) / text.length;
       results.push({ ...msg, score });
     }
-    if (results.length >= limit) break;
   }
+  // Sort first, then slice — otherwise we drop high-scoring matches that
+  // happen to sit late in the message array.
   results.sort((a, b) => b.score - a.score);
-  return results;
+  return results.slice(0, limit);
 }
 
 export function searchFirst(messages, query) {
@@ -87,9 +88,9 @@ export function searchFuzzy(messages, query, maxDistance = 2, limit = 20) {
     if (bestDist <= maxDistance) {
       results.push({ ...msg, distance: bestDist, score: 1 - bestDist / (q.length || 1) });
     }
-    if (results.length >= limit) break;
   }
 
+  // Sort first, then slice — same reason as searchText.
   results.sort((a, b) => a.distance - b.distance);
-  return results;
+  return results.slice(0, limit);
 }

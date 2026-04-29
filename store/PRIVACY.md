@@ -15,6 +15,16 @@ Recall stores the contents of conversation export files that you choose to impor
 
 Recall does not store, transmit, or otherwise process any other data on or about you.
 
+## Limited Use disclosure
+
+Recall complies with the Chrome Web Store User Data Policy, including its Limited Use requirements:
+
+- The data Recall handles (your imported AI conversation exports) is used **solely** to provide and improve the user-facing search feature of the extension. It is not used for any other purpose.
+- Recall does **not** transfer this data to any third party except as needed to provide the search feature, and there is no such third party in Recall's design — the data never leaves your browser.
+- Recall does **not** use this data for advertising, including personalized or targeted advertising.
+- Recall does **not** allow humans to read this data, except where the user explicitly chooses to view it inside the extension's own UI.
+- Recall does **not** sell this data.
+
 ## What Recall transmits
 
 **Nothing.** Recall makes no outbound network requests of any kind. There is no Recall server. There is no analytics provider. There is no telemetry endpoint. There is no error reporting service.
@@ -27,10 +37,11 @@ You can verify this by:
 
 ## Permissions
 
-Recall requests one permission, `storage`, which is used to persist your imported conversations in IndexedDB so the archive survives across browser sessions.
+**Recall declares zero permissions.** All data is stored in IndexedDB, which is available to extensions without any permission declaration. There is nothing for Chrome to grant Recall, because Recall does not ask Chrome for anything beyond running its own popup and options page.
 
-Recall does not request:
+In particular, Recall does not request:
 
+- `storage`
 - `host_permissions`
 - `tabs`
 - `activeTab`

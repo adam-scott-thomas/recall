@@ -10,7 +10,7 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 > Recall — Search Your AI Conversation History
 
 **Summary** (max 132 chars; appears in search results and the install card)
-> Search every ChatGPT and Claude conversation you've ever had. Fully local. Zero network calls. One permission.
+> Search every ChatGPT and Claude conversation you've ever had. Fully local. Zero network calls. Zero permissions.
 
 **Category**
 > Productivity
@@ -24,7 +24,7 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 
 > ### Search every conversation you've ever had with ChatGPT or Claude — locally, in your browser.
 >
-> Recall imports your ChatGPT and Claude data exports and turns them into a searchable archive that lives entirely inside your browser. No server. No account. No cloud. No telemetry. No analytics. One permission: `storage`.
+> Recall imports your ChatGPT and Claude data exports and turns them into a searchable archive that lives entirely inside your browser. No server. No account. No cloud. No telemetry. No analytics. Zero Chrome permissions declared.
 >
 > ### What you get
 >
@@ -40,7 +40,7 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 > Most "private" tools assume you'll trust them. Recall is built so you don't have to.
 >
 > - **Zero network calls.** Recall makes no outbound HTTP requests, ever. Verifiable by inspecting the source or watching the Network tab — there is no server to talk to.
-> - **One permission.** `storage`. Nothing else. No `tabs`, no `host_permissions`, no `activeTab`, no content scripts, no remote code.
+> - **Zero permissions.** Recall declares no `storage`, no `host_permissions`, no `tabs`, no `activeTab`, no content scripts, no remote code. IndexedDB is available to extensions without any permission declaration.
 > - **All data lives in IndexedDB** inside your browser profile. Uninstall the extension and the data is gone.
 > - **No runtime dependencies.** The only third-party code in the repo is dev-only test tooling (vitest, fake-indexeddb).
 > - **Apache 2.0 open source.** Read every line of the source on GitHub. The package on the Web Store is built from a tagged commit and the build is reproducible.
@@ -79,11 +79,24 @@ Chrome Web Store requires you to declare data handling. Recall's answers:
 
 | Question | Answer |
 |---|---|
-| Does this extension collect or use the user's personal or sensitive information? | **No** |
-| Single purpose | Local search of imported AI conversation history files |
-| Permission justification — `storage` | Used to persist imported conversations in the browser's IndexedDB so the user can search their archive across sessions. No data is transmitted off-device. |
+| Does this extension collect or use the user's personal or sensitive information? | **No** transmission. The user voluntarily imports their own conversation export files into local browser storage (IndexedDB). The data never leaves the browser. |
+| Single purpose | Local search of user-imported AI conversation export files. |
+| Permission justification | **Recall declares zero permissions.** No `host_permissions`, no content scripts, no remote code. |
 | Remote code | **No.** All scripts are bundled in the extension package; no remote code is loaded. |
-| Data usage certification | I certify that the use of data in Recall complies with the Chrome Web Store Developer Program Policies. |
+| Data usage certification | I certify that the use of data in Recall complies with the Chrome Web Store Developer Program Policies, including the Limited Use requirements of the User Data Policy. |
+
+### Reviewer test instructions
+
+Provide these in the "Notes for the reviewer" field on the Web Store dashboard:
+
+> 1. Install the extension.
+> 2. Open the Recall settings page (right-click the extension icon → Options).
+> 3. Import a small ChatGPT `conversations.json` export or a Claude JSON/JSONL export.
+> 4. Open the Recall popup (or click "Open Search" for the full-tab view).
+> 5. Search for a known phrase from the imported file — results should appear with the matched phrase highlighted.
+> 6. Use "Export All Data" and "Delete All Data" from the settings page.
+>
+> Expected: all data remains local. The extension makes no network requests, uses no analytics, and loads no remote code.
 
 **Privacy policy URL:** `https://ghostlogic.tech/recall/privacy`
 

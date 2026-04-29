@@ -76,26 +76,35 @@ function loadConversations() {
 }
 
 function renderConversationList(convs) {
-  resultsContainer.innerHTML = convs.map(conv => `
-    <div class="result-card conv-card" data-conv-id="${escapeHtml(conv.conversationId)}">
-      <div class="result-meta">
-        ${conv.domain ? `<span class="domain-badge">${escapeHtml(conv.domain)}</span>` : ''}
-        <span class="conv-title">${escapeHtml(conv.title || 'Untitled')}</span>
+  resultsContainer.innerHTML = convs.map(conv => {
+    const convId = escapeHtml(conv.conversationId || '');
+    const domain = conv.domain ? `<span class="domain-badge">${escapeHtml(conv.domain)}</span>` : '';
+    const title = escapeHtml(conv.title || 'Untitled');
+    const count = escapeHtml(String(conv.messageCount ?? '?'));
+    const time = conv.createTime ? ' · ' + escapeHtml(formatTime(conv.createTime)) : '';
+    return `
+      <div class="result-card conv-card" data-conv-id="${convId}">
+        <div class="result-meta">
+          ${domain}
+          <span class="conv-title">${title}</span>
+        </div>
+        <div class="result-time">${count} messages${time}</div>
       </div>
-      <div class="result-time">${conv.messageCount || '?'} messages${conv.createTime ? ' · ' + formatTime(conv.createTime) : ''}</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderResults(results, query) {
   resultsContainer.innerHTML = results.map(msg => {
     const snippet = highlightMatch(msg.text || '', query);
-    const time = msg.timestamp ? formatTime(msg.timestamp) : '';
-    const role = msg.role || 'unknown';
+    const time = msg.timestamp ? escapeHtml(formatTime(msg.timestamp)) : '';
+    const role = escapeHtml(msg.role || 'unknown');
     const title = msg.convTitle || msg.conversationId || '';
+    const convId = escapeHtml(msg.conversationId || '');
+    const msgId = escapeHtml(msg.messageId || '');
 
     return `
-      <div class="result-card" data-conv-id="${msg.conversationId}" data-msg-id="${msg.messageId}">
+      <div class="result-card" data-conv-id="${convId}" data-msg-id="${msgId}">
         <div class="result-meta">
           <span class="role-badge ${role}">${role}</span>
           <span class="conv-title">${escapeHtml(title)}</span>
@@ -146,20 +155,22 @@ function showConversation(convId, highlightMsgId) {
       messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
       container.innerHTML = messages.map(msg => {
-        const role = msg.role || 'unknown';
+        const role = escapeHtml(msg.role || 'unknown');
+        const msgId = escapeHtml(msg.messageId || '');
         const isHighlighted = msg.messageId === highlightMsgId;
         return `
           <div class="message-bubble ${role} ${isHighlighted ? 'highlighted' : ''}"
-               id="msg-${msg.messageId}">
+               id="msg-${msgId}">
             <div class="message-role">${role}</div>
             <div>${escapeHtml(msg.text || '')}</div>
           </div>
         `;
       }).join('');
 
-      // Scroll to highlighted message
+      // Scroll to highlighted message — querySelector with attribute match
+      // avoids issues if escapeHtml-safe IDs contain CSS-special characters.
       if (highlightMsgId) {
-        const el = document.getElementById('msg-' + highlightMsgId);
+        const el = container.querySelector(`[id="msg-${CSS.escape(highlightMsgId)}"]`);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
@@ -174,7 +185,12 @@ function highlightMatch(text, query) {
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function escapeRegExp(str) {

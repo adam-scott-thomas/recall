@@ -34,16 +34,14 @@ jobs:
             const m = require('./manifest.json');
             if (m.manifest_version !== 3) { console.error('manifest_version must be 3'); process.exit(1); }
             if (!m.name || !m.version || !m.description) { console.error('name/version/description required'); process.exit(1); }
-            for (const p of (m.permissions || [])) {
-              if (!['storage'].includes(p)) {
-                console.error('Unexpected permission: ' + p + ' (Recall must stay storage-only)');
-                process.exit(1);
-              }
+            if ((m.permissions || []).length > 0) {
+              console.error('Recall must declare zero permissions. Found: ' + JSON.stringify(m.permissions));
+              process.exit(1);
             }
             for (const k of ['host_permissions','content_scripts','externally_connectable']) {
-              if (m[k]) { console.error('Unexpected key for storage-only extension: ' + k); process.exit(1); }
+              if (m[k]) { console.error('Unexpected key for zero-permission extension: ' + k); process.exit(1); }
             }
-            console.log('manifest.json OK (MV3, storage-only, no host permissions)');
+            console.log('manifest.json OK (MV3, zero permissions, no host permissions, no content scripts)');
           "
       - name: Verify version matches package.json
         run: |
