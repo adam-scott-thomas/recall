@@ -240,24 +240,180 @@ async function flattenClaude(rawConv) {
 }
 
 // ---------------------------------------------------------------------------
+// Document flatteners (text / markdown / html)
+// ---------------------------------------------------------------------------
+
+/**
+ * Strip HTML tags and decode common entities to plain text.
+ * Uses DOMParser when available (Window/Worker contexts including MV3 SW),
+ * with a regex fallback for safety.
+ *
+ * @param {string} html
+ * @returns {{text: string, title: string}}
+ */
+function _htmlToText(html) {
+  let text = '';
+  let title = '';
+
+  try {
+    if (typeof DOMParser !== 'undefined') {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      title = doc.querySelector('title')?.textContent?.trim() ?? '';
+      // Drop script/style/noscript content from the text body.
+      doc.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+      text = (doc.body?.textContent ?? doc.documentElement?.textContent ?? '').trim();
+    }
+  } catch { /* fall through to regex strip */ }
+
+  if (!text) {
+    // Regex fallback — sufficient for malformed HTML or contexts without DOMParser.
+    const titleMatch = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+    if (titleMatch) title = titleMatch[1].trim();
+    text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  return { text, title };
+}
+
+/**
+ * Extract a title from a markdown body — first ATX heading, fallback to
+ * first non-empty line if it's short enough to look like a title.
+ *
+ * @param {string} md
+ * @returns {string}
+ */
+function _markdownTitle(md) {
+  for (const raw of md.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const heading = /^#{1,6}\s+(.+?)\s*#*\s*$/.exec(line);
+    if (heading) return heading[1];
+    // First non-empty line, only if it reads like a title.
+    return line.length <= 120 ? line : '';
+  }
+  return '';
+}
+
+/**
+ * Strip a filename of its extension for use as a fallback title.
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
+function _titleFromFilename(filename) {
+  if (!filename) return '';
+  const base = filename.replace(/^.*[\\/]/, '');
+  const idx = base.lastIndexOf('.');
+  return idx > 0 ? base.slice(0, idx) : base;
+}
+
+/**
+ * Flatten a plain document (text/markdown/html) into a single-message
+ * conversation. The whole file body becomes one user-role message; the
+ * conversation title is derived from the document title where available,
+ * otherwise the filename.
+ *
+ * @param {string} body
+ * @param {string} filename
+ * @param {'text'|'markdown'|'html'} format
+ * @returns {Promise<{conversation: object, messages: object[]}>}
+ */
+async function flattenDocument(body, filename, format) {
+  let text = body;
+  let derivedTitle = '';
+
+  if (format === 'html') {
+    const { text: stripped, title } = _htmlToText(body);
+    text = stripped;
+    derivedTitle = title;
+  } else if (format === 'markdown') {
+    derivedTitle = _markdownTitle(body);
+  }
+
+  const title = derivedTitle || _titleFromFilename(filename) || 'Untitled document';
+  const conversationId = _generateId();
+  const messageId = _generateId();
+  const now = Math.floor(Date.now() / 1000);
+
+  const role = 'user';
+  const contentHash = await computeContentHash(role, text);
+
+  const message = {
+    messageId,
+    conversationId,
+    role,
+    text,
+    contentHash,
+    timestamp: now,
+    wordCount: text.trim() ? text.trim().split(/\s+/).length : 0,
+    charCount: text.length,
+    modelSlug: null,
+    parentId: null,
+  };
+
+  const convContentHash = await computeContentHash('conversation', contentHash);
+
+  const conversation = {
+    conversationId,
+    title,
+    createTime: now,
+    updateTime: now,
+    messageCount: 1,
+    firstMessageTime: now,
+    lastMessageTime: now,
+    modelSlugs: [],
+    contentHash: convContentHash,
+    sourceFormat: format, // 'text' | 'markdown' | 'html'
+  };
+
+  return { conversation, messages: [message] };
+}
+
+// ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
 
 /**
  * Parse a raw export string into normalized conversations and messages.
- * Supports every format the sniffer recognizes: chatgpt_array, chatgpt_single,
- * claude_array, claude_single, claude_jsonl.
+ * Supports every format the sniffer recognizes:
+ *   - Conversation exports: chatgpt_array, chatgpt_single, claude_array,
+ *     claude_single, claude_jsonl
+ *   - Plain documents: text, markdown, html
+ *
+ * Plain documents become one-conversation, one-message records.
  *
  * @param {string} rawText  The raw export file body
- * @param {'chatgpt_array'|'chatgpt_single'|'claude_array'|'claude_single'|'claude_jsonl'} format
+ * @param {'chatgpt_array'|'chatgpt_single'|'claude_array'|'claude_single'|'claude_jsonl'|'text'|'markdown'|'html'} format
+ * @param {string} [filename]  Original filename — used as a title fallback for documents
  * @returns {Promise<{conversations: object[], messages: object[]}>}
  */
-export async function parseExport(rawText, format) {
+export async function parseExport(rawText, format, filename = '') {
+  // ----- Plain document formats: one file = one conversation
+  if (format === 'text' || format === 'markdown' || format === 'html') {
+    const result = await flattenDocument(rawText, filename, format);
+    return {
+      conversations: [result.conversation],
+      messages: result.messages,
+    };
+  }
+
+  // ----- Conversation export formats
   let rawConversations;
   let flavor; // 'chatgpt' | 'claude'
 
   if (format === 'claude_jsonl') {
-    // One JSON object per line.
     rawConversations = rawText
       .split(/\r?\n/)
       .map(line => line.trim())

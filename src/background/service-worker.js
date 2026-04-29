@@ -75,12 +75,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 async function handleImport(rawText, filename) {
   await ensureStore();
-  const { format, confidence } = sniffFormat(rawText);
+  const { format, confidence } = sniffFormat(rawText, filename);
   if (format === 'unknown' || confidence < 0.5) {
-    return { error: 'Unrecognized format. Please upload a ChatGPT or Claude export file.' };
+    return { error: 'Unrecognized format. Recall accepts ChatGPT/Claude exports (.json, .jsonl) and plain documents (.txt, .md, .html).' };
   }
 
-  const { conversations, messages } = await parseExport(rawText, format);
+  const { conversations, messages } = await parseExport(rawText, format, filename);
 
   // Build conv → messages map once instead of filtering N times inside the loop.
   // For a 1k-conv / 50k-msg export this turns ~50M iterations into ~50K.

@@ -21,6 +21,7 @@ Recall helps you search and revisit your AI conversation history after importing
 - First-mention detection for finding when a topic first appeared
 - ChatGPT JSON export import
 - Claude JSON and JSONL export import
+- Plain documents — `.txt`, `.md` / `.markdown`, `.html` / `.htm`
 
 ## Privacy and Trust
 
