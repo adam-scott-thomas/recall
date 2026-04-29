@@ -68,7 +68,7 @@ If a future version of Recall ever changes the data-handling model — for examp
 
 ## Contact
 
-Questions or concerns: open an issue at https://github.com/adam-scott-thomas/recall/issues, or email contact@ghostlogic.tech.
+Questions or concerns: email **support@ghostlogic.tech**.
 
 ## Open source
 
