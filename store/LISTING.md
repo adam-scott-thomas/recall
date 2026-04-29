@@ -100,6 +100,10 @@ Provide these in the "Notes for the reviewer" field on the Web Store dashboard:
 
 **Privacy policy URL:** `https://ghostlogic.tech/recall/privacy`
 
+**Homepage URL:** `https://ghostlogic.tech/recall`
+
+**Support URL:** `https://github.com/adam-scott-thomas/recall/issues`
+
 ---
 
 ## Screenshots (you'll capture these — recommended set, all 1280×800 PNG)

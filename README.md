@@ -6,6 +6,8 @@ Recall is a Chrome extension that imports your ChatGPT and Claude conversation e
 
 Your data stays on your machine. Recall does not send your conversations to a server, analytics tool, or cloud service.
 
+> Recall processes user-provided conversation data entirely locally in the browser and does not transmit, store, or share this data externally.
+
 ## What It Does
 
 Recall helps you search and revisit your AI conversation history after importing your own export files.
