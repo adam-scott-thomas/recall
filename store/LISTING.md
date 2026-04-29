@@ -2,6 +2,8 @@
 
 Submission copy for Chrome Web Store. Keep within character limits noted in parentheses.
 
+> **Versions:** the copy below is the v1.1.0 listing. The v1.0.0 submission used an earlier, narrower description ("ChatGPT and Claude" only); see git history for the v1.0.0 wording if needed for diffing the dashboard.
+
 ---
 
 ## Item details
@@ -10,7 +12,7 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 > Recall — Search Your AI Conversation History
 
 **Summary** (max 132 chars; appears in search results and the install card)
-> Search every ChatGPT and Claude conversation you've ever had. Fully local. Zero network calls. Zero permissions.
+> Search your ChatGPT and Claude exports — and any text, markdown, or HTML file. Fully local. Zero network. Zero permissions.
 
 **Category**
 > Productivity
@@ -22,9 +24,9 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 
 ## Detailed description (max 16,000 chars)
 
-> ### Search every conversation you've ever had with ChatGPT or Claude — locally, in your browser.
+> ### Search every conversation you've ever had with ChatGPT or Claude — and any text, markdown, or HTML file — locally, in your browser.
 >
-> Recall imports your ChatGPT and Claude data exports and turns them into a searchable archive that lives entirely inside your browser. No server. No account. No cloud. No telemetry. No analytics. Zero Chrome permissions declared.
+> Recall imports your ChatGPT and Claude data exports, plus any plain text, markdown, or HTML file you point it at, and turns them into a searchable archive that lives entirely inside your browser. No server. No account. No cloud. No telemetry. No analytics. Zero Chrome permissions declared.
 >
 > ### What you get
 >
@@ -33,7 +35,8 @@ Submission copy for Chrome Web Store. Keep within character limits noted in pare
 > - **Timeline view** of your conversation history so you can see when you were working on what.
 > - **First-mention detection** — instantly find when you first discussed a topic, person, or project.
 > - **Automatic domain tags** assigned locally on import (no external classifier).
-> - **Both ChatGPT JSON and Claude JSON/JSONL exports** supported.
+> - **ChatGPT JSON and Claude JSON/JSONL exports** supported out of the box.
+> - **Plain text, markdown, and HTML files** import as one-message conversations — drop in notes, articles, saved web pages, anything text-based.
 >
 > ### How privacy actually works
 >
@@ -91,7 +94,7 @@ Provide these in the "Notes for the reviewer" field on the Web Store dashboard:
 
 > 1. Install the extension.
 > 2. Open the Recall settings page (right-click the extension icon → Options).
-> 3. Import a small ChatGPT `conversations.json` export or a Claude JSON/JSONL export.
+> 3. Import a small ChatGPT `conversations.json` export, a Claude JSON/JSONL export, or any `.txt` / `.md` / `.html` file.
 > 4. Open the Recall popup (or click "Open Search" for the full-tab view).
 > 5. Search for a known phrase from the imported file — results should appear with the matched phrase highlighted.
 > 6. Use "Export All Data" and "Delete All Data" from the settings page.
