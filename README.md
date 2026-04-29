@@ -1,94 +1,104 @@
 # Recall
 
-Search your AI conversation history. Fully local, open source.
+Search your AI conversation history. Fully local. Open source.
+
+Recall is a Chrome extension that imports your ChatGPT and Claude conversation exports and makes them searchable in your browser.
+
+Your data stays on your machine. Recall does not send your conversations to a server, analytics tool, or cloud service.
 
 ## What It Does
 
-Recall is a Chrome extension that imports your ChatGPT and Claude conversation exports and makes them searchable. Everything runs in your browser. No data leaves your machine.
+Recall helps you search and revisit your AI conversation history after importing your own export files.
 
-Features:
+## Features
 
-- Full-text search across all imported conversations
+- Full-text search across imported conversations
 - Fuzzy search for approximate matches
-- Domain classification tags (automatically assigned locally)
-- Timeline view of your conversation history
-- First-mention detection — find when you first discussed a topic
-- Import ChatGPT JSON exports and Claude JSON/JSONL exports
+- Local domain classification tags
+- Timeline view of conversation history
+- First-mention detection for finding when a topic first appeared
+- ChatGPT JSON export import
+- Claude JSON and JSONL export import
 
 ## Privacy and Trust
 
-- Zero network calls — Recall makes no outbound requests, ever
-- All data stays in your browser's IndexedDB
-- No cloud, no analytics, no telemetry, no cookies
-- One permission required: `storage`
-- Apache-2.0 licensed — read every line of the source
-- No runtime dependencies — only devDependencies for testing
+Recall is built to be local-first and inspectable.
 
-See [docs/SECURITY.md](docs/SECURITY.md) for full details on data handling and how to verify these claims independently.
+- No outbound network requests
+- No cloud storage
+- No analytics
+- No telemetry
+- No cookies
+- Data is stored locally in your browser's IndexedDB
+- Requires only Chrome's `storage` permission
+- Apache 2.0 licensed
+- No runtime dependencies
+
+See `docs/SECURITY.md` for details on data handling and how to verify these claims.
 
 ## Installation
 
-Recall is a Chrome extension installed in developer mode. It is not published to the Chrome Web Store.
+Recall is currently installed in Chrome developer mode. It is not yet published to the Chrome Web Store.
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/adam-scott-thomas/recall.git
-   ```
+Clone the repository:
 
-2. Open Chrome and go to `chrome://extensions`
+```bash
+git clone https://github.com/adam-scott-thomas/recall.git
+```
 
-3. Enable Developer Mode (toggle in the top-right corner)
+Then:
 
-4. Click "Load Unpacked"
-
-5. Select the `recall/` directory (the one containing `manifest.json`)
-
-The extension icon will appear in your toolbar.
+1. Open Chrome and go to `chrome://extensions`
+2. Enable Developer Mode
+3. Click Load unpacked
+4. Select the `recall/` directory containing `manifest.json`
+5. Pin the Recall icon to your toolbar
 
 ## Usage
 
-1. Click the Recall extension icon to open the popup search interface
-
-2. Go to the options page to import your export file:
-   - Right-click the extension icon and select Options, or
-   - Click the gear icon inside the popup
-
-3. Select your ChatGPT or Claude export file and click Import
-
+1. Click the Recall extension icon
+2. Open the options page
+3. Import your ChatGPT or Claude export file
 4. Search your conversations from the popup
 
-## How to Export Your Conversation Data
+You can open options by right-clicking the extension icon and selecting Options, or by clicking the gear icon inside the popup.
 
-**ChatGPT:**
+## Export Your Conversation Data
+
+### ChatGPT
 
 1. Log in to ChatGPT
-2. Click your profile icon → Settings
+2. Open Settings
 3. Go to Data Controls
 4. Click Export Data
-5. Wait for the email from OpenAI, then download the archive
+5. Download the archive from the email
 6. Extract the archive and locate `conversations.json`
 
-**Claude:**
+### Claude
 
 1. Log in to Claude
-2. Click your profile icon → Settings
+2. Open Settings
 3. Go to Privacy
 4. Click Export Data
 5. Download the exported file
 
 ## Development
 
-```
+```bash
 npm install
 npm test
 ```
 
-Tests run with vitest. Source files are in `src/`. Tests are in `tests/`.
+Tests run with Vitest. Source files are in `src/`. Tests are in `tests/`.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a description of the data flow and module design.
+See `docs/ARCHITECTURE.md` for the data flow and module design.
+
+## Feedback
+
+Feedback is welcome. Recall is early, local-first, and open source, so bug reports, suggestions, and rough edges you notice are genuinely useful.
 
 ## License
 
-Apache License 2.0.
+Apache License 2.0. Copyright GhostLogic LLC.
 
 See [LICENSE](LICENSE) for the full license text.
